@@ -431,8 +431,8 @@
   <nav id="nav">
     <div class="grp">소개</div>
     <a href="#intro" class="active">Core DevKit 소개</a>
-    <a href="#install">설치 방법</a>
     <a href="#interop">연계 시스템</a>
+    <a href="#install">설치 방법</a>
     <a href="#libs">라이브러리</a>
     <div class="grp">기능 가이드</div>
     <a href="#dtogen"><span class="ico">⚙</span>DTO Generator <span class="side-ph">개발 중</span></a>
@@ -497,6 +497,91 @@
     <tr><td>🎯 Field Tracking</td>
         <td>@ServiceId 어노테이션 위에서 우클릭 → 팝업 내에서 트래킹 하고자 하는 필드명 입력 후 추적</td></tr>
   </table>
+</section>
+
+<!-- ═══════════ 4. 연계 시스템 ═══════════ -->
+<section id="interop">
+  <h2>연계 시스템</h2>
+  <p>Core DevKit이 연계하는 이종 시스템과 통신 방법, 인증 방법을 정리합니다.</p>
+  <div class="arch">
+    <div class="node" style="grid-area:a">
+      <b>EIMS <em>전문관리시스템</em></b>
+      <div class="what">전문 · 서비스 조회, 로그인</div>
+      <div class="auth">인증 · 사번 로그인 세션</div>
+      <span class="use">DTO Generator · API Test</span>
+    </div>
+    <div class="node" style="grid-area:c">
+      <b>MCP (DB)</b>
+      <div class="what">DEV DB 읽기전용 쿼리 실행 · DML 차단</div>
+      <div class="auth">인증 · opencode 로그인 토큰</div>
+      <span class="use">Run Query</span>
+    </div>
+    <div class="node" style="grid-area:b">
+      <b>META / DATA WARE</b>
+      <div class="what">테이블 · 표준코드 · 용어 메타 조회</div>
+      <div class="auth">인증 · connect.xml (ChangeFlow 로그인 시 갱신)</div>
+      <span class="use">META Search</span>
+    </div>
+    <div class="node" style="grid-area:d">
+      <b>API 실행환경</b>
+      <div class="what">개발 MCI / 로컬 서버 실호출</div>
+      <div class="auth">인증 · 사번 기반 세션 (emnb)</div>
+      <span class="use">API Test</span>
+    </div>
+    <div class="ln to-r" style="grid-area:la"></div>
+    <div class="ln to-r" style="grid-area:lc"></div>
+    <div class="ln to-l" style="grid-area:lb"></div>
+    <div class="ln to-l" style="grid-area:ld"></div>
+    <div class="hub" style="grid-area:h">
+      <div class="mk">H</div>
+      <b>Core DevKit</b>
+      <span>STS 플러그인 · 라이브러리 jar 번들<br>별도 설치 없음</span>
+    </div>
+    <div class="vln" style="grid-area:v"></div>
+    <div class="node ai" style="grid-area:i">
+      <b>AI — opencode CLI</b>
+      <div class="what">코드 위험도 분석 · 필드 흐름 분석</div>
+      <span class="use">Risk Analyzer · Field Tracking</span>
+    </div>
+  </div>
+  <table class="tbl">
+    <tr><th style="width:150px">시스템</th><th>연계 방식</th><th>인증 방법</th><th>사용 기능</th></tr>
+    <tr>
+      <td><b>EIMS</b><br><span style="font-size:12px;color:#888">전문관리시스템</span></td>
+      <td>HTTPS <code>https://eims.hanwhalife.com</code></td>
+      <td>사번 로그인 (API Test에서 로그인 세션 유지)</td>
+      <td>전문/서비스 조회, 로그인<br><span style="font-size:12px;color:#888">DTO Generator, API Test</span></td>
+    </tr>
+    <tr>
+      <td><b>META / DATA WARE</b></td>
+      <td>HTTPS <code>https://met.hanwhalife.com/dataware</code></td>
+      <td>connect.xml 자격증명 (ChangeFlow 로그인 시 자동 갱신)</td>
+      <td>테이블/표준코드/용어 메타 조회<br><span style="font-size:12px;color:#888">Table Info, Code Lookup, META Search</span></td>
+    </tr>
+    <tr>
+      <td><b>MCP (DB)</b></td>
+      <td>MCP over HTTPS SSE<br><code>https://aip-llm.hanwhalife.com:30101/mcp/</code></td>
+      <td>opencode 로그인 토큰 (Bearer)</td>
+      <td>DEV DB 읽기전용 쿼리 실행<br><span style="font-size:12px;color:#888">Run Query</span></td>
+    </tr>
+    <tr>
+      <td><b>API 실행환경</b></td>
+      <td>개발: <code>https://devinf.hanwhalife.com:7713/mci/</code><br>로컬: variables 참고</td>
+      <td>사번 기반 세션 (emnb)</td>
+      <td>API Test 실제 호출</td>
+    </tr>
+    <tr>
+      <td><b>AI</b></td>
+      <td>opencode CLI 프로세스 실행</td>
+      <td>opencode 로그인 (사내 MCP)</td>
+      <td>코드 위험도 분석, 필드 흐름 분석<br><span style="font-size:12px;color:#888">Code Risk Analyzer, Field Tracking</span></td>
+    </tr>
+  </table>
+  <div class="callout">
+    <b>MCP 읽기전용 정책</b> — MCP 게이트웨이는 DEV DB에 대해 SELECT 전용으로 동작하며,
+    DML(EXPLAIN PLAN 포함)은 GUARD 정책으로 차단됩니다. Run Query의 실행계획 탭은
+    이 정책에 따라 테이블 통계와 인덱스 정보를 대신 표시합니다.
+  </div>
 </section>
 
 <!-- ═══════════ 2. 설치 방법 ═══════════ -->
@@ -1019,91 +1104,6 @@
       <div style="font-size:11.5px;color:#8a93a8;margin-top:6px">필드 검색 → 하이라이트 → Ctrl+Click 호출부 이동 → 쿼리 하이라이팅 → AI 분석까지 전 과정</div>
     </div>
   </details>
-</section>
-
-<!-- ═══════════ 4. 연계 시스템 ═══════════ -->
-<section id="interop">
-  <h2>연계 시스템</h2>
-  <p>Core DevKit이 연계하는 이종 시스템과 통신 방법, 인증 방법을 정리합니다.</p>
-  <div class="arch">
-    <div class="node" style="grid-area:a">
-      <b>EIMS <em>전문관리시스템</em></b>
-      <div class="what">전문 · 서비스 조회, 로그인</div>
-      <div class="auth">인증 · 사번 로그인 세션</div>
-      <span class="use">DTO Generator · API Test</span>
-    </div>
-    <div class="node" style="grid-area:c">
-      <b>MCP (DB)</b>
-      <div class="what">DEV DB 읽기전용 쿼리 실행 · DML 차단</div>
-      <div class="auth">인증 · opencode 로그인 토큰</div>
-      <span class="use">Run Query</span>
-    </div>
-    <div class="node" style="grid-area:b">
-      <b>META / DATA WARE</b>
-      <div class="what">테이블 · 표준코드 · 용어 메타 조회</div>
-      <div class="auth">인증 · connect.xml (ChangeFlow 로그인 시 갱신)</div>
-      <span class="use">META Search</span>
-    </div>
-    <div class="node" style="grid-area:d">
-      <b>API 실행환경</b>
-      <div class="what">개발 MCI / 로컬 서버 실호출</div>
-      <div class="auth">인증 · 사번 기반 세션 (emnb)</div>
-      <span class="use">API Test</span>
-    </div>
-    <div class="ln to-r" style="grid-area:la"></div>
-    <div class="ln to-r" style="grid-area:lc"></div>
-    <div class="ln to-l" style="grid-area:lb"></div>
-    <div class="ln to-l" style="grid-area:ld"></div>
-    <div class="hub" style="grid-area:h">
-      <div class="mk">H</div>
-      <b>Core DevKit</b>
-      <span>STS 플러그인 · 라이브러리 jar 번들<br>별도 설치 없음</span>
-    </div>
-    <div class="vln" style="grid-area:v"></div>
-    <div class="node ai" style="grid-area:i">
-      <b>AI — opencode CLI</b>
-      <div class="what">코드 위험도 분석 · 필드 흐름 분석</div>
-      <span class="use">Risk Analyzer · Field Tracking</span>
-    </div>
-  </div>
-  <table class="tbl">
-    <tr><th style="width:150px">시스템</th><th>연계 방식</th><th>인증 방법</th><th>사용 기능</th></tr>
-    <tr>
-      <td><b>EIMS</b><br><span style="font-size:12px;color:#888">전문관리시스템</span></td>
-      <td>HTTPS <code>https://eims.hanwhalife.com</code></td>
-      <td>사번 로그인 (API Test에서 로그인 세션 유지)</td>
-      <td>전문/서비스 조회, 로그인<br><span style="font-size:12px;color:#888">DTO Generator, API Test</span></td>
-    </tr>
-    <tr>
-      <td><b>META / DATA WARE</b></td>
-      <td>HTTPS <code>https://met.hanwhalife.com/dataware</code></td>
-      <td>connect.xml 자격증명 (ChangeFlow 로그인 시 자동 갱신)</td>
-      <td>테이블/표준코드/용어 메타 조회<br><span style="font-size:12px;color:#888">Table Info, Code Lookup, META Search</span></td>
-    </tr>
-    <tr>
-      <td><b>MCP (DB)</b></td>
-      <td>MCP over HTTPS SSE<br><code>https://aip-llm.hanwhalife.com:30101/mcp/</code></td>
-      <td>opencode 로그인 토큰 (Bearer)</td>
-      <td>DEV DB 읽기전용 쿼리 실행<br><span style="font-size:12px;color:#888">Run Query</span></td>
-    </tr>
-    <tr>
-      <td><b>API 실행환경</b></td>
-      <td>개발: <code>https://devinf.hanwhalife.com:7713/mci/</code><br>로컬: variables 참고</td>
-      <td>사번 기반 세션 (emnb)</td>
-      <td>API Test 실제 호출</td>
-    </tr>
-    <tr>
-      <td><b>AI</b></td>
-      <td>opencode CLI 프로세스 실행</td>
-      <td>opencode 로그인 (사내 MCP)</td>
-      <td>코드 위험도 분석, 필드 흐름 분석<br><span style="font-size:12px;color:#888">Code Risk Analyzer, Field Tracking</span></td>
-    </tr>
-  </table>
-  <div class="callout">
-    <b>MCP 읽기전용 정책</b> — MCP 게이트웨이는 DEV DB에 대해 SELECT 전용으로 동작하며,
-    DML(EXPLAIN PLAN 포함)은 GUARD 정책으로 차단됩니다. Run Query의 실행계획 탭은
-    이 정책에 따라 테이블 통계와 인덱스 정보를 대신 표시합니다.
-  </div>
 </section>
 
 <!-- ═══════════ 5. 라이브러리 ═══════════ -->
